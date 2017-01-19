@@ -1,0 +1,4 @@
+.rebar
+*.beam
+/ebin
+erl_crash.dump
