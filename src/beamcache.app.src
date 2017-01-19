@@ -1,0 +1,7 @@
+{application, beamcache, [{description, "BEAM cache"},
+                          {vsn, "0.0.1"},
+                          {registered, []},
+                          {applications, [kernel, stdlib]},
+                          {modules, []},
+                          {env, []},
+                          {licenses, ["LGPL-2.1+"]}]}.
