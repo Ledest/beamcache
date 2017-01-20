@@ -54,13 +54,7 @@ make_term(D, I) -> erl_syntax:revert(erl_syntax_lib:map(fun(T) -> erl_syntax:set
 make_term(D, I) -> set_pos(erl_parse:abstract(D), I).
 
 set_pos({T, _}, I) -> {T, I};
-set_pos(T, I) when tuple_size(T) >= 3 ->
-    setelement(2,
-               setelement(3, T,
-                          case element(3, T) of
-                              [_|_] = E -> [set_pos(X, I) || X <- E];
-                              E -> set_pos(E, I)
-                          end),
-               I);
+set_pos([_|_] = L, I) -> [set_pos(T, I) || T <- L];
+set_pos(T, I) when tuple_size(T) >= 3 -> setelement(2, setelement(3, T, set_pos(element(3, T), I)), I);
 set_pos(T, _I) -> T.
 -endif.
