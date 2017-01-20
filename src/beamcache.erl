@@ -37,13 +37,30 @@ forms(M, D, L) ->
             [{var, 10, 'D'}]}],
           []}]}]},
      {function, 12, get, 1,
-      clause(I - 1, lists:sort(fun erlang:'>='/2, L), []) ++
+      clause(I - 1, lists:sort(fun erlang:'>='/2, L)) ++
       [{clause, I, [{var, I, 'K'}], [],
         [{call, I, {atom, I, error}, [{tuple, I, [{atom, I, badkey}, {var, I, 'K'}]}]}]}]},
      {eof, I + 1}].
 
-clause(_I, [], F) -> F;
-clause(I, [{K, V}|L], F) -> clause(I - 1, L, [{clause, I, [make_term(K, I)], [], [make_term(V, I)]}|F]);
-clause(I, [K|L], F) -> clause(I, [{K, true}|L], F).
+clause(I, L) -> clause(I, L, []).
 
+clause(I, [{K, V}|L], F) -> clause(I - 1, L, [{clause, I, [make_term(K, I)], [], [make_term(V, I)]}|F]);
+clause(I, [K|L], F) -> clause(I, [{K, true}|L], F);
+clause(_I, [], F) -> F.
+
+-ifdef(USE_ERL_SYNTAX).
 make_term(D, I) -> erl_syntax:revert(erl_syntax_lib:map(fun(T) -> erl_syntax:set_pos(T, I) end, erl_syntax:abstract(D))).
+-else.
+make_term(D, I) -> set_pos(erl_parse:abstract(D), I).
+
+set_pos({T, _}, I) -> {T, I};
+set_pos(T, I) when tuple_size(T) >= 3 ->
+    setelement(2,
+               setelement(3, T,
+                          case element(3, T) of
+                              [_|_] = E -> [set_pos(X, I) || X <- E];
+                              E -> set_pos(E, I)
+                          end),
+               I);
+set_pos(T, _I) -> T.
+-endif.
