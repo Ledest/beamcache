@@ -26,7 +26,7 @@ forms(M, D, L) ->
      {attribute, 1, module, M},
      {attribute, 2, export, [{get, 0}, {get, 1}, {get, 2}]},
      {attribute, 4, compile, {no_auto_import, [{get, 1}]}},
-     {function, 6, get, 0, [{clause, 6, [], [], [make_term(D, 6)]}]},
+     {function, 6, get, 0, [{clause, 6, [], [], [erl_parse:abstract(D, 6)]}]},
      {function, 8, get, 2,
       [{clause, 8, [{var, 8, 'K'}, {var, 8, 'D'}], [],
         [{'try', 9,
@@ -44,17 +44,10 @@ forms(M, D, L) ->
 
 clause(I, L) -> clause(I, L, []).
 
-clause(I, [{K, V}|L], F) -> clause(I - 1, L, [{clause, I, [make_term(K, I)], [], [make_term(V, I)]}|F]);
-clause(I, [K|L], F) -> clause(I, [{K, true}|L], F);
+clause(I, [KV|L], F) ->
+    {K, V} = case KV of
+                 {_, _} -> KV;
+                 _ -> {KV, true}
+             end,
+    clause(I - 1, L, [{clause, I, [erl_parse:abstract(K, I)], [], [erl_parse:abstract(V, I)]}|F]);
 clause(_I, [], F) -> F.
-
--ifdef(USE_ERL_SYNTAX).
-make_term(D, I) -> erl_syntax:revert(erl_syntax_lib:map(fun(T) -> erl_syntax:set_pos(T, I) end, erl_syntax:abstract(D))).
--else.
-make_term(D, I) -> set_pos(erl_parse:abstract(D), I).
-
-set_pos({T, _}, I) -> {T, I};
-set_pos([_|_] = L, I) -> [set_pos(T, I) || T <- L];
-set_pos(T, I) when tuple_size(T) >= 3 -> setelement(2, setelement(3, T, set_pos(element(3, T), I)), I);
-set_pos(T, _I) -> T.
--endif.
