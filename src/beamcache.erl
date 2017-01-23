@@ -4,6 +4,8 @@
          forms/2,
          module/2, module/3]).
 
+-spec init(M::module(), B::binary()) -> {module, module()} | {error, badarg | code:load_error_rsn()};
+          (M::module(), [{_, _}]|map()) -> {module, module()} | {error, badarg | code:load_error_rsn()} | error.
 init(M, B) when is_atom(M), is_binary(B) ->
     code:purge(M),
     code:load_binary(M, atom_to_list(M) ++ ".erl", B);
@@ -13,10 +15,13 @@ init(M, D) when is_atom(M), is_list(D) orelse is_map(D) ->
         Error -> Error
     end.
 
+-spec module(M::module(), D::[{_, _}]|map()) -> {ok, module(), binary()} | error.
 module(M, D) when is_atom(M), is_list(D) orelse is_map(D) -> compile:forms(forms(M, D)).
 
+-spec module(M::module(), D::[{_, _}]|map(), list()) -> {ok, module(), binary()} | error.
 module(M, D, O)  when is_atom(M), is_list(D) orelse is_map(D), is_list(O) -> compile:forms(forms(M, D, O)).
 
+-spec forms(M::module(), [{_, _}]|map()) -> [erl_parse:abstract_form()].
 forms(M, L) when is_atom(M), is_list(L) ->
     forms(M, L,
           try
@@ -26,6 +31,7 @@ forms(M, L) when is_atom(M), is_list(L) ->
           end);
 forms(M, D) when is_atom(M), is_map(D) -> forms(M, D, D).
 
+-spec forms(M::module(), D::[{_, _}]|map(), Map::map()) -> [erl_parse:abstract_form()].
 forms(M, D, Map) ->
     [{attribute, 1, file, {atom_to_list(M) ++ ".erl", 1}},
      {attribute, 1, module, M},
