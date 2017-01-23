@@ -2,3 +2,4 @@
 *.beam
 /ebin
 erl_crash.dump
+/doc
