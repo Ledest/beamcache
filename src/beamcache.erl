@@ -17,7 +17,11 @@ module(M, D) when is_atom(M), is_list(D) orelse is_map(D) -> compile:forms(forms
 
 module(M, D, O)  when is_atom(M), is_list(D) orelse is_map(D), is_list(O) -> compile:forms(forms(M, D, O)).
 
-forms(M, D) when is_atom(M), is_list(D) -> forms(M, D, D);
+forms(M, D) when is_atom(M), is_list(D) ->
+    lists:all(fun({_, _}) -> true;
+                 (_) -> false
+              end, D) orelse error(badarg, [M, D]),
+    forms(M, D, D);
 forms(M, D) when is_atom(M), is_map(D) -> forms(M, D, maps:to_list(D)).
 
 forms(M, D, L) ->
