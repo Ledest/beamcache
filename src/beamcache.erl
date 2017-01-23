@@ -22,7 +22,7 @@ forms(M, D) when is_atom(M), is_list(D) ->
                  (_) -> false
               end, D) orelse error(badarg, [M, D]),
     forms(M, D, D);
-forms(M, D) when is_atom(M), is_map(D) -> forms(M, D, maps:to_list(D)).
+forms(M, D) when is_atom(M), is_map(D) -> forms(M, D, lists:sort(maps:to_list(D))).
 
 forms(M, D, L) ->
     I = 12 + length(L),
@@ -41,7 +41,7 @@ forms(M, D, L) ->
             [{var, 10, 'D'}]}],
           []}]}]},
      {function, 12, get, 1,
-      clause(I - 1, lists:sort(fun erlang:'>='/2, L)) ++
+      clause(I - 1, lists:reverse(L)) ++
       [{clause, I, [{var, I, 'K'}], [],
         [{call, I, {atom, I, error}, [{tuple, I, [{atom, I, badkey}, {var, I, 'K'}]}]}]}]},
      {eof, I + 1}].
