@@ -17,36 +17,35 @@ module(M, D) when is_atom(M), is_list(D) orelse is_map(D) -> compile:forms(forms
 
 module(M, D, O)  when is_atom(M), is_list(D) orelse is_map(D), is_list(O) -> compile:forms(forms(M, D, O)).
 
-forms(M, D) when is_atom(M), is_list(D) ->
-    lists:all(fun({_, _}) -> true;
-                 (_) -> false
-              end, D) orelse error(badarg, [M, D]),
-    forms(M, D, D);
-forms(M, D) when is_atom(M), is_map(D) -> forms(M, D, lists:sort(maps:to_list(D))).
+forms(M, L) when is_atom(M), is_list(L) ->
+    forms(M, L,
+          try
+              maps:from_list(L)
+          catch
+              error:badarg -> error(badarg, [L])
+          end);
+forms(M, D) when is_atom(M), is_map(D) -> forms(M, D, D).
 
-forms(M, D, L) ->
-    I = 12 + length(L),
+forms(M, D, Map) ->
     [{attribute, 1, file, {atom_to_list(M) ++ ".erl", 1}},
      {attribute, 1, module, M},
-     {attribute, 2, export, [{get, 0}, {get, 1}, {get, 2}]},
-     {attribute, 4, compile, {no_auto_import, [{get, 1}]}},
+     {attribute, 2, compile, {no_auto_import, [{get, 1}]}},
+     {attribute, 4, export, [{get, 0}, {get, 1}, {get, 2}]},
      {function, 6, get, 0, [{clause, 6, [], [], [erl_parse:abstract(D, 6)]}]},
-     {function, 8, get, 2,
-      [{clause, 8, [{var, 8, 'K'}, {var, 8, 'D'}], [],
+     {function, 8, get, 1,
+      [{clause, 8, [{var, 8, 'K'}], [],
         [{'try', 9,
-          [{call, 9, {atom, 9, get}, [{var, 9, 'K'}]}], [],
-          [{clause, 10,
-            [{tuple, 10, [{atom, 10, error}, {tuple, 10, [{atom, 10, badkey}, {var, 10, 'K'}]}, {var, 10, '_'}]}],
+          [{call, 10, {remote, 10, {atom, 10, maps}, {atom, 10, get}},
+            [{var, 10, 'K'}, erl_parse:abstract(Map, 10)]}],
+          [],
+          [{clause, 11,
+            [{tuple, 12, [{atom, 12, error}, {tuple, 12, [{atom, 12, badkey}, {var, 12, '_'}]}, {var, 12, '_'}]}],
             [],
-            [{var, 10, 'D'}]}],
+            [{call, 12, {atom, 12, error},
+              [{tuple, 12, [{atom, 12, badkey}, {var, 12, 'K'}]}, {cons, 12, {var, 12, 'K'}, {nil, 12}}]}]}],
           []}]}]},
-     {function, 12, get, 1,
-      clause(I - 1, lists:reverse(L)) ++
-      [{clause, I, [{var, I, 'K'}], [],
-        [{call, I, {atom, I, error}, [{tuple, I, [{atom, I, badkey}, {var, I, 'K'}]}]}]}]},
-     {eof, I + 1}].
-
-clause(I, L) -> clause(I, L, []).
-
-clause(I, [{K, V}|L], F) -> clause(I - 1, L, [{clause, I, [erl_parse:abstract(K, I)], [], [erl_parse:abstract(V, I)]}|F]);
-clause(_I, [], F) -> F.
+     {function, 15, get, 2,
+      [{clause, 15, [{var, 15, 'K'}, {var, 15, 'D'}], [],
+        [{call, 15, {remote, 15, {atom, 15, maps}, {atom, 15, get}},
+          [{var, 15, 'K'}, erl_parse:abstract(Map, 15), {var, 15, 'D'}]}]}]},
+     {eof, 16}].
