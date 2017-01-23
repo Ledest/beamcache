@@ -44,10 +44,5 @@ forms(M, D, L) ->
 
 clause(I, L) -> clause(I, L, []).
 
-clause(I, [KV|L], F) ->
-    {K, V} = case KV of
-                 {_, _} -> KV;
-                 _ -> {KV, true}
-             end,
-    clause(I - 1, L, [{clause, I, [erl_parse:abstract(K, I)], [], [erl_parse:abstract(V, I)]}|F]);
+clause(I, [{K, V}|L], F) -> clause(I - 1, L, [{clause, I, [erl_parse:abstract(K, I)], [], [erl_parse:abstract(V, I)]}|F]);
 clause(_I, [], F) -> F.
