@@ -36,6 +36,7 @@ forms(M, D, Map) ->
     [{attribute, 1, file, {atom_to_list(M) ++ ".erl", 1}},
      {attribute, 1, module, M},
      {attribute, 2, compile, {no_auto_import, [{get, 1}]}},
+     {attribute, 3, vsn, ?MODULE_STRING},
      {attribute, 4, export, [{get, 0}, {get, 1}, {get, 2}]},
      {function, 6, get, 0, [{clause, 6, [], [], [erl_parse:abstract(D, 6)]}]},
      {function, 8, get, 1,
