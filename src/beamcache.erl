@@ -16,10 +16,15 @@ init(M, D) when is_atom(M), is_list(D) orelse is_map(D) ->
     end.
 
 -spec module(M::module(), D::[{_, _}]|map()) -> {ok, module(), binary()} | error.
-module(M, D) -> module(M, D, []).
+module(M, D) when is_atom(M), is_list(D) orelse is_map(D) -> compile:forms(forms(M, D), [report_errors]).
 
 -spec module(M::module(), D::[{_, _}]|map(), list()) -> {ok, module(), binary()} | error.
-module(M, D, O)  when is_atom(M), is_list(D) orelse is_map(D), is_list(O) -> compile:forms(forms(M, D), O).
+module(M, D, O) when is_atom(M), is_list(D) orelse is_map(D), is_list(O) ->
+    compile:forms(forms(M, D),
+                  case lists:member(report_errors, O) of
+                      true -> O;
+                      false -> [report_errors|O]
+                  end).
 
 -spec forms(M::module(), [{_, _}]|map()) -> [erl_parse:abstract_form()].
 forms(M, L) when is_atom(M), is_list(L) ->
