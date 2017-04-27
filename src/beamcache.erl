@@ -18,13 +18,13 @@ init(M, D) when is_atom(M), is_list(D) orelse is_map(D) ->
           (M::module(), [{_, _}]|map(), O::code:options()) ->
           {module, module()} | {error, badarg | code:load_error_rsn()} | error.
 init(M, B, O) when is_atom(M), is_binary(B), is_list(O) ->
-    case proplists:get_bool(protected, O) of
+    case proplists:get_value(protected, O, true) of
         true ->
             true = code:unstick_mod(M),
             R = load(M, B),
             true = code:stick_mod(M),
             R;
-        false -> load(M, B)
+        _ -> load(M, B)
     end;
 init(M, D, O) when is_atom(M), is_list(D) orelse is_map(D), is_list(O) ->
     case module(M, D, proplists:delete(protected, O)) of
