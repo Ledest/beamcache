@@ -9,7 +9,7 @@
 init(M, B) when is_atom(M), is_binary(B) -> load(M, B);
 init(M, D) when is_atom(M), is_list(D) orelse is_map(D) ->
     case module(M, D) of
-        {ok, M, B} -> load(M, B);
+        {ok, M, B} -> init(M, B, []);
         Error -> Error
     end.
 
