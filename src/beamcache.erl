@@ -33,15 +33,11 @@ init(M, D, O) when is_atom(M), is_list(D) orelse is_map(D), is_list(O) ->
     end.
 
 -spec module(M::module(), D::[{_, _}]|map()) -> {ok, module(), binary()} | error.
-module(M, D) when is_atom(M), is_list(D) orelse is_map(D) -> compile:noenv_forms(forms(M, D), [report_errors]).
+module(M, D) -> module(M, D, [report_errors, slim]).
 
 -spec module(M::module(), D::[{_, _}]|map(), O::code:options()) -> {ok, module(), binary()} | error.
 module(M, D, O) when is_atom(M), is_list(D) orelse is_map(D), is_list(O) ->
-    compile:noenv_forms(forms(M, D),
-                        [no_postopt, no_copt|case proplists:is_defined(report_errors, O) of
-                                                 true -> O;
-                                                 false -> [report_errors|O]
-                                             end]).
+    compile:noenv_forms(forms(M, D), [no_postopt, no_copt|O]).
 
 -spec forms(M::module(), [{_, _}]|map()) -> compile:abstract_code().
 forms(M, L) when is_atom(M), is_list(L) ->
