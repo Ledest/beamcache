@@ -2,12 +2,13 @@
 
 -export([init/2, init/3,
          forms/2,
+         load/2,
          module/2, module/3]).
 
 -spec init(M::module(), B::binary()) -> {module, module()} | {error, badarg | code:load_error_rsn()};
-          (M::module(), [{_, _}]|map()) -> {module, module()} | {error, badarg | code:load_error_rsn()} | error.
+          (M::module(), D::map()) -> {module, module()} | {error, badarg | code:load_error_rsn()} | error.
 init(M, B) when is_atom(M), is_binary(B) -> load(M, B);
-init(M, D) when is_atom(M), is_list(D) orelse is_map(D) ->
+init(M, D) when is_atom(M), is_map(D) ->
     case module(M, D) of
         {ok, M, B} -> init(M, B, []);
         Error -> Error
@@ -15,7 +16,7 @@ init(M, D) when is_atom(M), is_list(D) orelse is_map(D) ->
 
 -spec init(M::module(), B::binary(), O::code:options()) ->
           {module, module()} | {error, badarg | code:load_error_rsn()};
-          (M::module(), [{_, _}]|map(), O::code:options()) ->
+          (M::module(), D::map(), O::code:options()) ->
           {module, module()} | {error, badarg | code:load_error_rsn()} | error.
 init(M, B, O) when is_atom(M), is_binary(B), is_list(O) ->
     case proplists:get_value(protected, O, true) of
@@ -26,7 +27,7 @@ init(M, B, O) when is_atom(M), is_binary(B), is_list(O) ->
             R;
         _ -> load(M, B)
     end;
-init(M, D, O) when is_atom(M), is_list(D) orelse is_map(D), is_list(O) ->
+init(M, D, O) when is_atom(M), is_map(D), is_list(O) ->
     case module(M, D, proplists:delete(protected, O)) of
         {ok, M, B} -> init(M, B, O);
         Error -> Error
@@ -35,22 +36,12 @@ init(M, D, O) when is_atom(M), is_list(D) orelse is_map(D), is_list(O) ->
 -spec module(M::module(), D::[{_, _}]|map()) -> {ok, module(), binary()} | error.
 module(M, D) -> module(M, D, []).
 
--spec module(M::module(), D::[{_, _}]|map(), O::code:options()) -> {ok, module(), binary()} | error.
-module(M, D, O) when is_atom(M), is_list(D) orelse is_map(D), is_list(O) ->
+-spec module(M::module(), D::map(), O::code:options()) -> {ok, module(), binary()} | error.
+module(M, D, O) when is_atom(M), is_map(D), is_list(O) ->
     compile:noenv_forms(forms(M, D), [no_line_info, slim|O]).
 
--spec forms(M::module(), [{_, _}]|map()) -> compile:abstract_code().
-forms(M, L) when is_atom(M), is_list(L) ->
-    forms(M, L,
-          try
-              maps:from_list(L)
-          catch
-              error:badarg -> error(badarg, [M, L])
-          end);
-forms(M, D) when is_atom(M), is_map(D) -> forms(M, D, D).
-
--spec forms(M::module(), D::[{_, _}]|map(), Map::map()) -> compile:abstract_code().
-forms(M, D, Map) ->
+-spec forms(M::module(), D::map()) -> compile:abstract_code().
+forms(M, D) ->
     [{attribute, 1, file, {atom_to_list(M) ++ ".erl", 1}},
      {attribute, 1, module, M},
      {attribute, 2, compile, {no_auto_import, [{get, 1}]}},
@@ -59,7 +50,7 @@ forms(M, D, Map) ->
      {function, 8, get, 1,
       [{clause, 8, [{var, 8, 'K'}], [],
         [{'try', 9,
-          [{call, 10, {remote, 10, {atom, 10, maps}, {atom, 10, get}}, [{var, 10, 'K'}, erl_parse:abstract(Map, 10)]}],
+          [{call, 10, {remote, 10, {atom, 10, maps}, {atom, 10, get}}, [{var, 10, 'K'}, erl_parse:abstract(D, 10)]}],
           [],
           [{clause, 11,
             [{tuple, 12, [{atom, 12, error}, {tuple, 12, [{atom, 12, badkey}, {var, 12, '_'}]}, {var, 12, '_'}]}],
@@ -70,7 +61,7 @@ forms(M, D, Map) ->
      {function, 15, get, 2,
       [{clause, 15, [{var, 15, 'K'}, {var, 15, 'D'}], [],
         [{call, 15, {remote, 15, {atom, 15, maps}, {atom, 15, get}},
-          [{var, 15, 'K'}, erl_parse:abstract(Map, 15), {var, 15, 'D'}]}]}]},
+          [{var, 15, 'K'}, erl_parse:abstract(D, 15), {var, 15, 'D'}]}]}]},
      {eof, 16}].
 
 -spec load(M::module(), B::binary()) -> {module, module()} | {error, badarg | code:load_error_rsn()}.
