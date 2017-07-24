@@ -8,7 +8,7 @@
 -spec init(M::module(), B::binary()) -> {module, module()} | {error, badarg | code:load_error_rsn()};
           (M::module(), D::map()) -> {module, module()} | {error, badarg | code:load_error_rsn()} | error.
 init(M, B) when is_atom(M), is_binary(B) -> load(M, B);
-init(M, D) when is_atom(M), is_map(D) ->
+init(M, D) ->
     case module(M, D) of
         {ok, M, B} -> init(M, B, []);
         Error -> Error
@@ -16,7 +16,7 @@ init(M, D) when is_atom(M), is_map(D) ->
 
 -spec init(M::module(), B::binary(), O::code:options()) ->
           {module, module()} | {error, badarg | code:load_error_rsn()};
-          (M::module(), D::map(), O::code:options()) ->
+          (M::module(), D::map()|[{term(), term()}], O::code:options()) ->
           {module, module()} | {error, badarg | code:load_error_rsn()} | error.
 init(M, B, O) when is_atom(M), is_binary(B), is_list(O) ->
     case proplists:get_value(protected, O, true) of
@@ -27,21 +27,21 @@ init(M, B, O) when is_atom(M), is_binary(B), is_list(O) ->
             R;
         _ -> load(M, B)
     end;
-init(M, D, O) when is_atom(M), is_map(D), is_list(O) ->
+init(M, D, O) ->
     case module(M, D, proplists:delete(protected, O)) of
         {ok, M, B} -> init(M, B, O);
         Error -> Error
     end.
 
--spec module(M::module(), D::[{_, _}]|map()) -> {ok, module(), binary()} | error.
+-spec module(M::module(), D::map()|[{term(), term()}]) -> {ok, module(), binary()} | error.
 module(M, D) -> module(M, D, []).
 
--spec module(M::module(), D::map(), O::code:options()) -> {ok, module(), binary()} | error.
-module(M, D, O) when is_atom(M), is_map(D), is_list(O) ->
+-spec module(M::module(), D::map()|[{term(), term()}], O::code:options()) -> {ok, module(), binary()} | error.
+module(M, D, O) when is_list(O) ->
     compile:noenv_forms(forms(M, D), [no_line_info, slim|O]).
 
--spec forms(M::module(), D::map()) -> compile:abstract_code().
-forms(M, D) ->
+-spec forms(M::module(), D::map()|[{term(), term()}]) -> compile:abstract_code().
+forms(M, D) when is_atom(M), is_map(D) ->
     [{attribute, 1, file, {atom_to_list(M) ++ ".erl", 1}},
      {attribute, 1, module, M},
      {attribute, 2, compile, {no_auto_import, [{get, 1}]}},
@@ -62,7 +62,8 @@ forms(M, D) ->
       [{clause, 15, [{var, 15, 'K'}, {var, 15, 'D'}], [],
         [{call, 15, {remote, 15, {atom, 15, maps}, {atom, 15, get}},
           [{var, 15, 'K'}, erl_parse:abstract(D, 15), {var, 15, 'D'}]}]}]},
-     {eof, 16}].
+     {eof, 16}];
+forms(M, D) when is_list(D) -> forms(M, maps:from_list(D)).
 
 -spec load(M::module(), B::binary()) -> {module, module()} | {error, badarg | code:load_error_rsn()}.
 load(M, B) ->
