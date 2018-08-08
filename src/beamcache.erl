@@ -5,10 +5,14 @@
          load/2,
          module/2, module/3]).
 
--dialyzer([no_return, {nowarn_function, [load/2, module/3]}]).
+-dialyzer([{nowarn_function, [load/2, module/3]},
+           {no_return, [init/2, init/3, load/2, module/2, module/3]}]).
 
--spec init(M::module(), B::binary()) -> {module, module()} | {error, badarg | code:load_error_rsn()};
-          (M::module(), D::map()) -> {module, module()} | {error, badarg | code:load_error_rsn()} | error.
+-type options()::[protected|compile:option()].
+
+-spec init(M, B::binary()) -> {module, M} | {error, badarg | code:load_error_rsn()};
+          (M, D::map()|[{term(), term()}]) -> {module, M} | {error, badarg | code:load_error_rsn()} | error
+  when M::module().
 init(M, B) when is_atom(M), is_binary(B) -> load(M, B);
 init(M, D) ->
     case module(M, D) of
@@ -16,10 +20,9 @@ init(M, D) ->
         Error -> Error
     end.
 
--spec init(M::module(), B::binary(), O::code:options()) ->
-          {module, module()} | {error, badarg | code:load_error_rsn()};
-          (M::module(), D::map()|[{term(), term()}], O::code:options()) ->
-          {module, module()} | {error, badarg | code:load_error_rsn()} | error.
+-spec init(M, B::binary(), O::options()) -> {module, M} | {error, badarg | code:load_error_rsn()};
+          (M, D::map()|[{term(), term()}], O::options()) -> {module, M} | {error, badarg | code:load_error_rsn()} | error
+  when M::module().
 init(M, B, O) when is_atom(M), is_binary(B), is_list(O) ->
     case proplists:get_value(protected, O, true) of
         true ->
@@ -35,14 +38,13 @@ init(M, D, O) ->
         Error -> Error
     end.
 
--spec module(M::module(), D::map()|[{term(), term()}]) -> {ok, module(), binary()} | error.
+-spec module(M, D::map()|[{term(), term()}]) -> {ok, M, binary()} | error when M::module().
 module(M, D) -> module(M, D, []).
 
--spec module(M::module(), D::map()|[{term(), term()}], O::code:options()) -> {ok, module(), binary()} | error.
-module(M, D, O) when is_list(O) ->
-    compile:noenv_forms(forms(M, D), [no_line_info, slim|O]).
+-spec module(M, D::map()|[{term(), term()}], O::[compile:option()]) -> {ok, M, binary()} | error when M::module().
+module(M, D, O) when is_list(O) -> compile:noenv_forms(forms(M, D), [no_line_info, slim|O]).
 
--spec forms(M::module(), D::map()|[{term(), term()}]) -> compile:abstract_code().
+-spec forms(M::module(), D::map()|[{term(), term()}]) -> [tuple()].
 forms(M, D) when is_atom(M), is_map(D) ->
     [{attribute, 1, module, M},
      {attribute, 2, compile, {no_auto_import, [{get, 1}]}},
