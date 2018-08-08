@@ -5,6 +5,8 @@
          load/2,
          module/2, module/3]).
 
+-dialyzer([no_return, {nowarn_function, [load/2, module/3]}]).
+
 -spec init(M::module(), B::binary()) -> {module, module()} | {error, badarg | code:load_error_rsn()};
           (M::module(), D::map()) -> {module, module()} | {error, badarg | code:load_error_rsn()} | error.
 init(M, B) when is_atom(M), is_binary(B) -> load(M, B);
