@@ -42,8 +42,7 @@ module(M, D, O) when is_list(O) ->
 
 -spec forms(M::module(), D::map()|[{term(), term()}]) -> compile:abstract_code().
 forms(M, D) when is_atom(M), is_map(D) ->
-    [{attribute, 1, file, {atom_to_list(M) ++ ".erl", 1}},
-     {attribute, 1, module, M},
+    [{attribute, 1, module, M},
      {attribute, 2, compile, {no_auto_import, [{get, 1}]}},
      {attribute, 4, export, [{get, 0}, {get, 1}, {get, 2}]},
      {function, 6, get, 0, [{clause, 6, [], [], [erl_parse:abstract(D, 6)]}]},
@@ -68,4 +67,4 @@ forms(M, D) when is_list(D) -> forms(M, maps:from_list(D)).
 -spec load(M::module(), B::binary()) -> {module, module()} | {error, badarg | code:load_error_rsn()}.
 load(M, B) ->
     code:purge(M),
-    code:load_binary(M, atom_to_list(M) ++ ".erl", B).
+    code:load_binary(M, generated, B).
