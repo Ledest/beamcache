@@ -71,4 +71,4 @@ forms(M, D) when is_list(D) -> forms(M, maps:from_list(D)).
 -spec load(M::module(), B::binary()) -> {module, module()} | {error, badarg | code:load_error_rsn()}.
 load(M, B) ->
     code:purge(M),
-    code:load_binary(M, generated, B).
+    code:load_binary(M, "", B).
