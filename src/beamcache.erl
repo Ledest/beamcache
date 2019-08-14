@@ -47,8 +47,8 @@ module(M, D, O) when is_list(O) -> compile:noenv_forms(forms(M, D), [no_line_inf
 -spec forms(M::module(), D::map()|[{term(), term()}]) -> [tuple()].
 forms(M, D) when is_atom(M), is_map(D) ->
     [{attribute, 1, module, M},
-     {attribute, 2, compile, {no_auto_import, [{get, 1}]}},
-     {attribute, 4, export, [{get, 0}, {get, 1}, {get, 2}]},
+     {attribute, 2, compile, {no_auto_import, [{get, 0}]}},
+     {attribute, 4, export, [{get, 0}, {get, 1}, {get, 2}, {erase, 1}, {put, 2}]},
      {function, 6, get, 0, [{clause, 6, [], [], [erl_parse:abstract(D, 6)]}]},
      {function, 8, get, 1,
       [{clause, 8, [{var, 8, 'K'}], [],
@@ -65,7 +65,17 @@ forms(M, D) when is_atom(M), is_map(D) ->
       [{clause, 15, [{var, 15, 'K'}, {var, 15, 'D'}], [],
         [{call, 15, {remote, 15, {atom, 15, maps}, {atom, 15, get}},
           [{var, 15, 'K'}, erl_parse:abstract(D, 15), {var, 15, 'D'}]}]}]},
-     {eof, 16}];
+     {function, 17, erase, 1,
+      [{clause, 17, [{var, 17, 'K'}], [],
+        [{call, 17, {remote, 17, {atom, 17, ?MODULE}, {atom, 17, init}},
+          [{atom, 17, M}, {call, 17, {remote, 17, {atom, 17, maps}, {atom, 17, remove}},
+                           [{var, 17, 'K'}, {call, 17, {atom, 17, get}, []}]}]}]}]},
+     {function, 19, put, 2,
+      [{clause, 19, [{var, 19, 'K'}, {var, 19, 'V'}], [],
+        [{call, 19, {remote, 19, {atom, 19, ?MODULE}, {atom, 19, init}},
+          [{atom, 19, M}, {call, 19, {remote, 19, {atom, 19, maps}, {atom, 19, put}},
+                           [{var, 19, 'K'}, {var, 19, 'V'}, {call, 19, {atom, 19, get}, []}]}]}]}]},
+     {eof, 20}];
 forms(M, D) when is_list(D) -> forms(M, maps:from_list(D)).
 
 -spec load(M::module(), B::binary()) -> {module, module()} | {error, badarg | code:load_error_rsn()}.
