@@ -1,8 +1,6 @@
-beamcache: Erlang BEAM Cache
-============================
+# beamcache: Erlang BEAM Cache
 
-Usage
------
+## Usage
 
 ```erlang
 CacheName = my_cache,
@@ -22,6 +20,8 @@ To shut up xref and dialyzer add such module to sources:
 get() -> erlang:nif_error(undef).
 get(_) -> erlang:nif_error(undef).
 get(_, _) -> erlang:nif_error(undef).
+erase(_) -> erlang:nif_error(undef).
+put(_, _) -> erlang:nif_error(undef).
 ```
 
 To protect against using uninitialized cache add such module to sources:
