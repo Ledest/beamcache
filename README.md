@@ -1,3 +1,5 @@
+[![Build Status](https://github.com/Ledest/beamcache/actions/workflows/erlang.yml/badge.svg)](https://github.com/Ledest/beamcache/actions/workflows/erlang.yml/badge.svg)
+
 # beamcache: Erlang BEAM Cache
 
 ## Usage
