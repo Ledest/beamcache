@@ -3,3 +3,5 @@
 /ebin
 erl_crash.dump
 /doc
+/_build
+rebar.lock
