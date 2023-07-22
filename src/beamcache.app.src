@@ -4,4 +4,5 @@
                           {applications, [kernel, stdlib]},
                           {modules, []},
                           {env, []},
+                          {links, [{"GitHub", "https://github.com/Ledest/beamcache"}]},
                           {licenses, ["LGPL-2.1+"]}]}.
