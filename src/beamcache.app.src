@@ -1,5 +1,5 @@
 {application, beamcache, [{description, "BEAM cache"},
-                          {vsn, "0.7.5"},
+                          {vsn, "0.7.6"},
                           {registered, []},
                           {applications, [kernel, stdlib]},
                           {modules, []},
@@ -7,4 +7,4 @@
                           {links, [{"GitHub", "https://github.com/Ledest/beamcache"}]},
                           {licenses, ["LGPL-2.1+"]},
                           {build_tools, [rebar, rebar3, make]},
-                          {exclude_patterns, ["rebar.lock"]}]}.
+                          {files, ["Makefile", "README.md", "rebar.config", "src"]}]}.
