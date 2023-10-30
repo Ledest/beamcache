@@ -1,5 +1,6 @@
 ERL ?= erl
 ERLC ?= $(ERL)c
+EDOC ?= edoc
 
 ifeq ($(NAME),)
 NAME != $(ERL) -noshell -eval 'io:put_chars(filename:basename(hd(filelib:wildcard("src/*.app.src")), ".app.src")).' -s init stop
@@ -31,7 +32,7 @@ ebin/:
 	mkdir ebin
 
 doc/edoc-info: $(SOURCES)
-	$(ERL) -noshell -eval 'edoc:application($(NAME), ".", [{new, true}]).' -s init stop
+	$(EDOC) -app . $(EDOC_OPTS)
 
 $(EUNIT_MODULES): $(SOURCES) $(TEST_SOURCES) .eunit/
 	$(ERLC) -o .eunit $(ERLC_OPTS) $(ERLC_DEFS) -DTEST $(SOURCES)
