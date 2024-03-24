@@ -1,5 +1,5 @@
 {application, beamcache, [{description, "BEAM cache"},
-                          {vsn, "0.7.7"},
+                          {vsn, "0.7.8"},
                           {registered, []},
                           {applications, [kernel, stdlib]},
                           {modules, []},
