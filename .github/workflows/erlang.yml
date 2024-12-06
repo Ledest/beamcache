@@ -8,12 +8,15 @@ on:
     branches:
     - master
 
+env:
+  ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: true
+
 jobs:
   build:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     strategy:
       matrix:
-        version: [27.0, 26.2, 26.1, 26.0, 25.3, 25.2, 25.1, 25.0, 24.3, 24.2, 24.1, 24.0, 23.3, 23.2, 23.1, 23.0, 22, 21, 20, 19, 18]
+        version: [27, 26, 25, 24, 23, 22, 21, 20]
         rebar: [rebar, rebar3]
     container:
       image: erlang:${{ matrix.version }}
